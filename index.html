@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙岗区入学积分可视化平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        accent: '#722ED1',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        neutral: {
+                            100: '#F2F3F5',
+                            200: '#E5E6EB',
+                            300: '#C9CDD4',
+                            400: '#86909C',
+                            500: '#4E5969',
+                            600: '#272E3B',
+                            700: '#1D2129',
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto { content-visibility: auto; }
+            .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+            .scrollbar-hide::-webkit-scrollbar { display: none; }
+            .card-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); }
+            .transition-all-300 { transition: all 300ms ease-in-out; }
+        }
+    </style>
+</head>
+<body class="font-inter bg-neutral-100 text-neutral-700 min-h-screen flex flex-col">
+    <!-- 顶部导航栏（年份更新为2022-2025） -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-bar-chart text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-neutral-700">龙岗区入学积分可视化平台</h1>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-2 bg-neutral-100 rounded-full px-3 py-1">
+                    <i class="fa fa-calendar text-neutral-400"></i>
+                    <span class="text-sm">数据年份: 2022-2025</span>
+                </div>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-neutral-100 transition-all-300">
+                    <i class="fa fa-moon-o text-neutral-500"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 container mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
+        <!-- 左侧街道选择面板（替换为龙岗8个街道） -->
+        <aside class="lg:w-1/5 xl:w-1/6 bg-white rounded-xl p-4 card-shadow h-fit">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-bold text-lg text-neutral-700">街道列表</h2>
+                <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">共8个</span>
+            </div>
+            
+            <div class="space-y-1 max-h-[calc(100vh-240px)] overflow-y-auto scrollbar-hide pr-2">
+                <!-- 街道按钮：按实际学校数更新 -->
+                <button class="street-btn w-full text-left px-3 py-2 rounded-lg bg-primary text-white flex justify-between items-center">
+                    <span>龙城街道</span>
+                    <span class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">22所</span>
+                </button>
+                <button class="street-btn w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100 transition-all-300 flex justify-between items-center">
+                    <span>龙岗街道(大学区)</span>
+                    <span class="bg-neutral-100 text-neutral-500 text-xs px-2 py-0.5 rounded-full">14所</span>
+                </button>
+                <button class="street-btn w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100 transition-all-300 flex justify-between items-center">
+                    <span>宝龙街道</span>
+                    <span class="bg-neutral-100 text-neutral-500 text-xs px-2 py-0.5 rounded-full">10所</span>
+                </button>
+                <button class="street-btn w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100 transition-all-300 flex justify-between items-center">
+                    <span>南湾街道</span>
+                    <span class="bg-neutral-100 text-neutral-500 text-xs px-2 py-0.5 rounded-full">9所</span>
+                </button>
+                <button class="street-btn w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100 transition-all-300 flex justify-between items-center">
+                    <span>平湖街道</span>
+                    <span class="bg-neutral-100 text-neutral-500 text-xs px-2 py-0.5 rounded-full">13所</span>
+                </button>
+                <button class="street-btn w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100 transition-all-300 flex justify-between items-center">
+                    <span>坂田街道</span>
+                    <span class="bg-neutral-100 text-neutral-500 text-xs px-2 py-0.5 rounded-full">17所</span>
+                </button>
+                <button class="street-btn w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100 transition-all-300 flex justify-between items-center">
+                    <span>坪地街道</span>
+                    <span class="bg-neutral-100 text-neutral-500 text-xs px-2 py-0.5 rounded-full">6所</span>
+                </button>
+                <button class="street-btn w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100 transition-all-300 flex justify-between items-center">
+                    <span>横岗+园山街道</span>
+                    <span class="bg-neutral-100 text-neutral-500 text-xs px-2 py-0.5 rounded-full">13所</span>
+                </button>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-neutral-200">
+                <h3 class="font-semibold text-neutral-600 mb-3">数据说明</h3>
+                <ul class="text-sm text-neutral-500 space-y-2">
+                    <li class="flex items-start">
+                        <i class="fa fa-info-circle text-primary mt-1 mr-2"></i>
+                        <span>展示龙岗区8街道2022-2025年小一录取积分</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-info-circle text-primary mt-1 mr-2"></i>
+                        <span>点击街道切换数据，图表实时更新</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-info-circle text-primary mt-1 mr-2"></i>
+                        <span>表格显示四年积分变化，绿色上升/红色下降</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+        
+        <!-- 右侧数据展示区（动态更新数据） -->
+        <section class="lg:w-4/5 xl:w-5/6 space-y-6">
+            <!-- 概览卡片（动态更新） -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-xl p-5 card-shadow hover:shadow-lg transition-all-300" id="totalCard">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-neutral-400 text-sm">学校总数</p>
+                            <h3 class="text-3xl font-bold mt-1 text-neutral-700">22</h3>
+                            <p class="text-green-500 text-sm mt-2 flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> （动态计算）
+                            </p>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fa fa-university"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 card-shadow hover:shadow-lg transition-all-300" id="avgCard">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-neutral-400 text-sm">2025年平均值</p>
+                            <h3 class="text-3xl font-bold mt-1 text-neutral-700">78.5</h3>
+                            <p class="text-green-500 text-sm mt-2 flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> （动态计算）
+                            </p>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+                            <i class="fa fa-line-chart"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 card-shadow hover:shadow-lg transition-all-300" id="maxCard">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-neutral-400 text-sm">最高值学校</p>
+                            <h3 class="text-xl font-bold mt-1 text-neutral-700">城东第一中学</h3>
+                            <p class="text-neutral-500 text-sm mt-2">2025年: 92.3</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                            <i class="fa fa-trophy"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 card-shadow hover:shadow-lg transition-all-300" id="growthCard">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-neutral-400 text-sm">增长最快</p>
+                            <h3 class="text-xl font-bold mt-1 text-neutral-700">城东第三小学</h3>
+                            <p class="text-green-500 text-sm mt-2 flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> （动态计算）
+                            </p>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                            <i class="fa fa-rocket"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 街道学校分布饼图（更新为龙岗8街道） -->
+            <div class="bg-white rounded-xl p-5 card-shadow">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-700">各街道学校数量分布</h2>
+                        <p class="text-neutral-400 text-sm mt-1">龙岗区8街道学校数量占比</p>
+                    </div>
+                    <div class="mt-3 md:mt-0 flex space-x-2">
+                        <button class="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary">全部</button>
+                        <button class="text-sm px-3 py-1 rounded-full bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-all-300">小学</button>
+                        <button class="text-sm px-3 py-1 rounded-full bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-all-300">中学</button>
+                    </div>
+                </div>
+                <div class="h-[300px] md:h-[350px]">
+                    <canvas id="streetDistributionChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 学校数据趋势（2022-2025）和年度对比 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 学校数据趋势图（折线图） -->
+                <div class="bg-white rounded-xl p-5 card-shadow">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-neutral-700" id="trendTitle">龙城街道各校积分趋势</h2>
+                            <p class="text-neutral-400 text-sm mt-1">2022-2025年积分变化</p>
+                        </div>
+                        <div class="mt-3 sm:mt-0 flex space-x-2">
+                            <button class="text-xs px-2 py-1 rounded-full bg-primary text-white text-xs">全部学校</button>
+                            <button class="text-xs px-2 py-1 rounded-full bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-all-300">小学</button>
+                            <button class="text-xs px-2 py-1 rounded-full bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-all-300">中学</button>
+                        </div>
+                    </div>
+                    <div class="h-[300px]">
+                        <canvas id="schoolTrendChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 年度数据对比图（柱状图） -->
+                <div class="bg-white rounded-xl p-5 card-shadow">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-neutral-700">年度数据对比</h2>
+                            <p class="text-neutral-400 text-sm mt-1">2022-2025年平均/最高/最低分对比</p>
+                        </div>
+                        <div class="mt-3 sm:mt-0">
+                            <select class="text-sm border border-neutral-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                <option>按平均值对比</option>
+                                <option>按最大值对比</option>
+                                <option>按最小值对比</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="h-[300px]">
+                        <canvas id="yearComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 学校数据详情表（动态更新） -->
+            <div class="bg-white rounded-xl p-5 card-shadow">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-700">学校积分详情</h2>
+                        <p class="text-neutral-400 text-sm mt-1">选中街道2022-2025年详细积分</p>
+                    </div>
+                    <div class="mt-3 md:mt-0 flex space-x-3">
+                        <div class="relative">
+                            <input type="text" placeholder="搜索学校..." class="pl-9 pr-3 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 w-full md:w-48">
+                            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></i>
+                        </div>
+                        <button class="text-sm px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all-300 flex items-center">
+                            <i class="fa fa-download mr-2"></i> 导出数据
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[768px]">
+                        <thead>
+                            <tr class="border-b border-neutral-200">
+                                <th class="text-left py-3 px-4 font-semibold text-neutral-600">学校名称</th>
+                                <th class="text-right py-3 px-4 font-semibold text-neutral-600">2022年</th>
+                                <th class="text-right py-3 px-4 font-semibold text-neutral-600">2023年</th>
+                                <th class="text-right py-3 px-4 font-semibold text-neutral-600">2024年</th>
+                                <th class="text-right py-3 px-4 font-semibold text-neutral-600">2025年</th>
+                                <th class="text-right py-3 px-4 font-semibold text-neutral-600">今年变化</th>
+                                <th class="text-right py-3 px-4 font-semibold text-neutral-600">趋势</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schoolTableBody">
+                            <!-- 动态插入行 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="flex justify-between items-center mt-5 text-sm">
+                    <div class="text-neutral-500" id="paginationInfo">显示 1 至 8，共 8 所学校</div>
+                    <div class="flex space-x-1">
+                        <button class="w-8 h-8 flex items-center justify-center rounded border border-neutral-200 text-neutral-400 hover:border-primary hover:text-primary transition-all-300">
+                            <i class="fa fa-angle-left"></i>
+                        </button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white">1</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded border border-neutral-200 hover:border-primary hover:text-primary transition-all-300">
+                            <i class="fa fa-angle-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚（版权年份更新为2025） -->
+    <footer class="bg-white border-t border-neutral-200 mt-8">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-neutral-500 text-sm">© 2025 龙岗区入学积分可视化平台 版权所有</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-neutral-400 hover:text-primary transition-all-300">
+                        <i class="fa fa-question-circle"></i> 帮助中心
+                    </a>
+                    <a href="#" class="text-neutral-400 hover:text-primary transition-all-300">
+                        <i class="fa fa-file-text-o"></i> 使用说明
+                    </a>
+                    <a href="#" class="text-neutral-400 hover:text-primary transition-all-300">
+                        <i class="fa fa-envelope-o"></i> 联系我们
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 1. 定义龙岗区各街道学校数据（简化示例，完整数据需补充）
+        const streetData = {
+						"龙城街道": [
+						{name: "深圳中学龙岗小学", scores: [91.7, 94, 100.2, 100] },
+						{ name: "港中文附属知新学校", scores: [77.9, 75, 67.8, 75] },
+						{ name: "港中文附属道远学校", scores: [92.2, 94.7, 91.7, 100] },
+						{ name: "龙外集团新亚洲学校", scores: [91, 91.75, 92.2, 95.7] },
+						{ name: "龙高集团平安里学校", scores: [93.5, 93.2, 95.85, 91.2] },
+						{ name: "深中龙岗集团兰著学校", scores: [68.7, 78.3, 75.6, 75.55] },
+						{ name: "龙岗区外国语", scores: [91.2, 91.95, 93.65, 95.25] },
+						{ name: "龙外集团星河学校", scores: [90.25, 90.25, 90.35, 90.25] },
+						{ name: "上海外国语附属龙岗学校", scores: [90.6, 91, 91, 91.9] },
+						{ name: "龙外集团致美学校", scores: [90.75, 90.95, 90.7, 90.8] },
+						{ name: "天成学校", scores: [86.5, 84.85, 69.6, 96.5] },
+						{ name: "龙城创新学校", scores: [83.95, 75, 75.45, 86.05] },
+						{ name: "清林小学", scores: [90.25, 93.3, 92.45, 92.1] },
+						{ name: "龙城小学", scores: [91.2, 96.35, 93.5, 93.65] },
+						{ name: "依山郡小学", scores: [95, 100.1, 95.75, 100] },
+						{ name: "龙岗区实验", scores: [92.15, 92.8, 92.05, 90.8] },
+						{ name: "龙外集团爱联小学", scores: [75.15, 84.1, 75, 75] },
+						{ name: "盛平小学", scores: [75, 75, 76.7, 75] },
+						{ name: "华南师范附属大运学校", scores: [90.15, 100, 86.4, 100] },
+						{ name: "悦澜山实验小学", scores: [69.55, 75, 71.55, 67.85] },
+						{ name: "天誉实验学校", scores: [75.6, 90, 91.2, 90.8] },
+						{ name: "兴泰实验学校 (民办)", scores: [63.45, 64.8, 63.85, 64.95] }
+						],
+						"龙岗街道(大学区)": [
+						{ name: "南联学校", scores: [94.05, 95, 85.8, 75] },
+						{ name: "新梓学校", scores: [66.3, 84.1, 68.3, 83.4] },
+						{ name: "华中师范附属龙园学校", scores: [66.1, 75, 63.3, 75] },
+						{ name: "仙田外国语", scores: [87.95, 91.55, 95, 100] },
+						{ name: "振新小学", scores: [67, 75, 64.65, 65.9] },
+						{ name: "龙西小学", scores: [66.4, 65.85, 64.1, 63.1] },
+						{ name: "清林径实验", scores: [64.3, 66.05, 62.45, 62.85] },
+						{ name: "千林山小学", scores: [93.55, 83.35, 75, 75.45] },
+						{ name: "未来双语", scores: [null, null, 75.7, 90] },
+						{ name: "龙外行知", scores: [null, null, 75, 75.15] },
+						{ name: "创星学校", scores: [null, null, 75.65, 88.35] },
+						{ name: "上艺学校", scores: [null, null, 63.35, 67.2] },
+						{ name: "丰丽学校 (民办)", scores: [63.5, 65.8, 63.35, 64.1] },
+						{ name: "鹏达学校 (民办)", scores: [63.95, 64.75, 63.3, 64.45] }
+						],
+						"宝龙街道": [
+						{ name: "宝龙科技城实验", scores: [102.85, 102.9, 102.2, 102.65] },
+						{ name: "宝龙外国语", scores: [85.9, 90.6, 75.35, 94.05] },
+						{ name: "同乐主力学校", scores: [64.45, 67.05, 66.3, 66.85] },
+						{ name: "同心实验学校", scores: [85.15, 86.05, 83.5, 87.7] },
+						{ name: "龙岗中心学校", scores: [90.75, 94, 75, 86.75] },
+						{ name: "深高级龙岗学校", scores: [65.1, 90.25, 87.95, 98.75] },
+						{ name: "宝荷学校", scores: [91.6, 90, 65.4, 92.2] },
+						{ name: "育贤小学", scores: [70, 68.45, 70, 75] },
+						{ name: "碧新小学", scores: [null, 75.35, 70, 91.05] },
+						{ name: "南约小学", scores: [70, 75, 62.35, 69.65] }
+						],
+						"南湾街道": [
+						{ name: "南湾学校", scores: [102.4, 102.85, 102.75, 102.7] },
+						{ name: "石芽岭学校", scores: [60.8, 87.9, 75, 75] },
+						{ name: "沙塘布学校", scores: [85, 90.5, 90.55, 90.1] },
+						{ name: "南岭小学", scores: [91.75, 92.4, 92.9, 93.75] },
+						{ name: "沙西小学", scores: [75.9, 90.3, 90.4, 91.25] },
+						{ name: "下李朗小学", scores: [67.55, 70, 67.4, 65.5] },
+						{ name: "沙湾小学", scores: [75, 85.35, 87.65, 85.9] },
+						{ name: "丹竹头小学", scores: [90, 90.05, 90.25, 90] },
+						{ name: "南湾实验小学", scores: [86.1, 101.15, 101.4, 101.9] }
+						],
+						"平湖街道": [
+						{ name: "平湖实验学校", scores: [95.45, 91, 94.8, 92.5] },
+						{ name: "平湖外国语", scores: [70, 75, 75, 75] },
+						{ name: "信德学校", scores: [90.65, 97, 81.9, 84.3] },
+						{ name: "平湖第二实验学校", scores: [66.9, 70, 64.25, 70] },
+						{ name: "华中师范附属平湖中心", scores: [85.05, 90, 90, 90.4] },
+						{ name: "凤凰山小学", scores: [92.25, 92.65, 93.2, 90.45] },
+						{ name: "辅城坳小学", scores: [66.95, 70, 66.15, 69.5] },
+						{ name: "鹅溪小学", scores: [65.5, 67.55, 65.95, 64.15] },
+						{ name: "白泥坑小学", scores: [64.3, 65.6, 65.3, 64.4] },
+						{ name: "守真小学", scores: [68.3, 70, 75, 64.6] },
+						{ name: "华南师大附属平湖学校", scores: [67.95, 69.9, 64.75, 66.25] },
+						{ name: "深圳外国语平湖学校", scores: [null, null, 103.15, 95.25] },
+						{ name: "河包围九年一贯制学校", scores: [null, null, null, 66.25] }
+						],
+						"坂田街道": [
+						{ name: "云和学校", scores: [60, 90.2, 90.25, 91.15] },
+						{ name: "深实验坂田", scores: [93.05, 100, 100, 100] },
+						{ name: "深大附属坂田", scores: [92.65, 92.25, 93.35, 92.75] },
+						{ name: "云端学校", scores: [null, null, 92.55, 96.35] },
+						{ name: "科技城外国语", scores: [91.95, 101.05, 94.35, 96.15] },
+						{ name: "坂田实验", scores: [91.35, 96.1, 90, 92.75] },
+						{ name: "科高扬美", scores: [65.7, 70, 68.85, 70] },
+						{ name: "五和实验", scores: [75, 88.3, 75, 75.4] },
+						{ name: "广东实验深圳学校", scores: [102.75, 102.35, 95.6, 94.85] },
+						{ name: "花城小学", scores: [75, 85, 75.5, 85.9] },
+						{ name: "五园小学", scores: [68.35, 75, 60, 69.65] },
+						{ name: "华南师大附属雅宝", scores: [67.25, 75, 75, 66.8] },
+						{ name: "坂田小学", scores: [65.85, 70, 68.2, 70] },
+						{ name: "雪象小学", scores: [64.65, 64.85, 66.55, 64.85] },
+						{ name: "宝岗小学", scores: [65, 66.75, 65.3, 65.9] },
+						{ name: "龙外集团和美小学", scores: [90, 91.05, 90.35, 90.55] },
+						{ name: "立雪小学", scores: [null, 63.6, 65.75, 65.45] }
+						],
+						"坪地街道": [
+						{ name: "兰陵学校", scores: [66.35, 67.5, 66.45, 66.35] },
+						{ name: "龙高集团东兴外国语", scores: [75, 85.9, 75, 64.35] },
+						{ name: "乐淮实验", scores: [65.8, 67, 68.5, 66.75] },
+						{ name: "科高龙岗", scores: [100.2, 100, 100, 100] },
+						{ name: "六联小学", scores: [64.45, 66.3, 65.8, 66.25] },
+						{ name: "坪地中心小学", scores: [70, 66.9, 67.25, 66.25] }
+						],
+						"横岗+园山街道": [
+						{ name: "横岗中心学校", scores: [87.2, 86.55, 82.05, 81.75] },
+						{ name: "四联小学", scores: [75, 75, 70, 70] },
+						{ name: "梧桐学校", scores: [101, 98.75, 100, 101.35] },
+						{ name: "横岗外国语", scores: [91.05, 101.75, 102.2, 95.4] },
+						{ name: "聚英小学", scores: [75, 75, 75, 63.3] },
+						{ name: "横岗中学小学部", scores: [101.6, 102.25, 82.5, 102.75] },
+						{ name: "六约学校", scores: [92, 90.75, 90.45, 83] },
+						{ name: "深北莫附属园山", scores: [70, 75, 75, 100] },
+						{ name: "安良小学", scores: [64.95, 66.35, 65.6, 67.1] },
+						{ name: "大康小学", scores: [65.35, 66.65, 66.4, 67.15] },
+						{ name: "厚德小学", scores: [64.8, 66, 66.25, 65.9] },
+						{ name: "水晶城小学", scores: [66.1, 70, 63.05, 68.85] },
+						{ name: "华南师大附属乐城小学", scores: [68.45, 70.45, 70, 70.45] }
+						]
+						};
+
+        // 2. 初始化图表（页面加载时默认显示龙城街道）
+        document.addEventListener('DOMContentLoaded', function() {
+            // 饼图：街道学校数量分布
+            const pieLabels = Object.keys(streetData);
+            const pieData = pieLabels.map(street => streetData[street].length);
+            const streetDistributionCtx = document.getElementById('streetDistributionChart').getContext('2d');
+            new Chart(streetDistributionCtx, {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieData,
+                        backgroundColor: ['#165DFF', '#36CFC9', '#722ED1', '#FF7D00', '#F53F3F', '#FF9A2E', '#14C9C9', '#7B61FF'],
+                        borderWidth: 0,
+                        hoverOffset: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 15,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value}所 (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+
+            // 趋势图和对比图初始化（默认加载龙城街道）
+            loadStreetData('龙城街道');
+
+            // 街道切换事件
+            const streetButtons = document.querySelectorAll('.street-btn');
+            streetButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 样式切换
+                    streetButtons.forEach(btn => {
+                        btn.classList.remove('bg-primary', 'text-white');
+                        btn.classList.add('hover:bg-neutral-100');
+                        const badge = btn.querySelector('span:last-child');
+                        badge.classList.remove('bg-white/20', 'text-white');
+                        badge.classList.add('bg-neutral-100', 'text-neutral-500');
+                    });
+                    this.classList.add('bg-primary', 'text-white');
+                    this.classList.remove('hover:bg-neutral-100');
+                    const badge = this.querySelector('span:last-child');
+                    badge.classList.add('bg-white/20', 'text-white');
+                    badge.classList.remove('bg-neutral-100', 'text-neutral-500');
+
+                    // 加载数据
+                    const streetName = this.querySelector('span:first-child').textContent;
+                    loadStreetData(streetName);
+                });
+            });
+
+            // 主题切换（保持原有逻辑）
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-moon-o');
+                icon.classList.toggle('fa-sun-o');
+            });
+        });
+
+        // 3. 核心函数：加载街道数据并更新所有模块
+        function loadStreetData(streetName) {
+            const schools = streetData[streetName] || [];
+const total = schools.length;
+
+// 更新学校总数
+document.getElementById('totalCard').querySelector('h3').textContent = total;
+
+// 计算并更新2025年平均分（排除无效数据）
+const validScores = schools
+    .map(s => s.scores[3])
+    .filter(score => score !== null && score !== undefined);
+const avg2025 = validScores.length > 0 
+    ? validScores.reduce((sum, score) => sum + score, 0) / validScores.length 
+    : 0;
+document.getElementById('avgCard').querySelector('h3').textContent = avg2025.toFixed(1);
+
+// 处理最高值学校（支持并列情况）
+if (validScores.length > 0) {
+    const maxScore = Math.max(...validScores);
+    const topSchools = schools.filter(s => s.scores[3] === maxScore);
+    
+    const maxCard = document.getElementById('maxCard');
+    // 多所学校用顿号分隔
+    const schoolNames = topSchools.map(school => school.name).join('<br>');
+    maxCard.querySelector('h3').innerHTML  = schoolNames;
+    maxCard.querySelector('p:nth-of-type(2)').textContent = 
+        `2025年最高: ${maxScore}（共${topSchools.length}所）`;
+} else {
+    // 无有效数据时的显示
+    const maxCard = document.getElementById('maxCard');
+    maxCard.querySelector('h3').textContent = '暂无数据';
+    maxCard.querySelector('p:nth-of-type(2)').textContent = '2025年: 无记录';
+}
+
+            // 增长最快（2025对比2024年）
+			const growth = schools
+				.filter(school => school.scores[2] !== null && school.scores[3] !== null)
+				.map(s => ({
+					name: s.name,
+					rate: ((s.scores[3] - s.scores[2]) / s.scores[2]) * 100
+				}))
+				.reduce((max, g) => g.rate > max.rate ? g : max, { rate: -Infinity });
+            if (growth.name) {
+                document.getElementById('growthCard').querySelector('h3').textContent = growth.name;
+                document.getElementById('growthCard').querySelector('p').textContent = `${growth.rate.toFixed(1)}% 年度增幅`;
+            }
+
+            // 更新趋势图标题
+            document.getElementById('trendTitle').textContent = `${streetName}各校积分趋势`;
+
+            // 更新趋势图（折线图）
+			const trendCanvas = document.getElementById('schoolTrendChart');
+            const trendCtx = trendCanvas.getContext('2d');
+            // if (window.schoolTrendChart) window.schoolTrendChart.destroy();
+			// 关键改进：通过Chart.js的API获取当前Canvas上的图表实例并销毁
+			// 不依赖全局变量，更可靠
+			if (window.Chart) {
+			  const existingChart = window.Chart.getChart(trendCanvas);
+			  if (existingChart) {
+				existingChart.destroy();
+			  }
+			}
+
+			// 确保Canvas状态干净
+			trendCtx.clearRect(0, 0, trendCanvas.width, trendCanvas.height);
+            window.schoolTrendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2022', '2023', '2024', '2025'],
+                    datasets: schools.map((school, idx) => ({
+                        label: school.name,
+                        data: school.scores,
+                        borderColor: ['#165DFF', '#36CFC9', '#722ED1', '#FF7D00', '#F53F3F', '#FF9A2E', '#14C9C9', '#7B61FF'][idx % 8],
+                        backgroundColor: 'rgba(22, 93, 255, 0.1)',
+                        tension: 0.3,
+                        fill: false,
+                        pointBackgroundColor: ['#165DFF', '#36CFC9', '#722ED1', '#FF7D00', '#F53F3F', '#FF9A2E', '#14C9C9', '#7B61FF'][idx % 8],
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 10,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 15,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+
+            // 更新年度对比图（柱状图）
+			const yearCanvas = document.getElementById('yearComparisonChart');
+            const yearCtx = yearCanvas.getContext('2d');
+            // if (window.yearComparisonChart) window.yearComparisonChart.destroy();
+			// 先销毁已存在的图表实例（关键修复）
+			if (window.Chart) {
+			  const existingYearChart = window.Chart.getChart(yearCanvas);
+			  if (existingYearChart) {
+				existingYearChart.destroy();
+			  }
+			}
+
+			// 清空画布
+			yearCtx.clearRect(0, 0, yearCanvas.width, yearCanvas.height);
+
+
+            const years = [2022, 2023, 2024, 2025];
+            const yearData = years.map((y, i) => schools.map(s => s.scores[i]));
+            const avgPerYear = yearData.map(arr => arr.reduce((a,b)=>a+b,0)/arr.length || 0);
+            const maxPerYear = yearData.map(arr => Math.max(...arr) || 0);
+            const minPerYear = yearData.map(arr => Math.min(...arr) || 0);
+            window.yearComparisonChart = new Chart(yearCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2022', '2023', '2024', '2025'],
+                    datasets: [
+                        { label: '平均值', data: avgPerYear, backgroundColor: '#165DFF', borderRadius: 4 },
+                        { label: '最大值', data: maxPerYear, backgroundColor: '#36CFC9', borderRadius: 4 },
+                        { label: '最小值', data: minPerYear, backgroundColor: '#722ED1', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 10,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 15,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+
+            // 更新详情表
+            const tbody = document.getElementById('schoolTableBody');
+            tbody.innerHTML = '';
+            schools.forEach(school => {
+                const change = ((school.scores[3] - school.scores[0]) / school.scores[0]) * 100;
+                const trendIcon = change > 0 
+                    ? 'fa fa-line-chart text-green-500' 
+                    : (change < 0 ? 'fa fa-line-chart text-red-500' : 'fa fa-line-chart text-neutral-400');
+                const row = `
+                    <tr class="border-b border-neutral-100 hover:bg-neutral-50 transition-all-300">
+                        <td class="py-3 px-4 font-medium">${school.name}</td>
+                        <td class="py-3 px-4 text-right">${school.scores[0]}</td>
+                        <td class="py-3 px-4 text-right">${school.scores[1]}</td>
+                        <td class="py-3 px-4 text-right">${school.scores[2]}</td>
+                        <td class="py-3 px-4 text-right font-medium">${school.scores[3]}</td>
+                        <td class="py-3 px-4 text-right ${change > 0 ? 'text-green-500' : (change < 0 ? 'text-red-500' : 'text-neutral-400')}">${change.toFixed(1)}%</td>
+                        <td class="py-3 px-4 text-right"><i class="${trendIcon}"></i></td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+            document.getElementById('paginationInfo').textContent = `显示 1 至 ${total}，共 ${total} 所学校`;
+        }
+    </script>
+</body>
+</html>
